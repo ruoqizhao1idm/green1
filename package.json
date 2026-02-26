@@ -1,0 +1,33 @@
+{
+  "name": "green-market-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sustainable Swaps in Dublin - web demo for Irish second-hand marketplace",
+  "main": "server/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "nodemon server/index.js",
+    "dev:client": "npm run dev --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "node server/index.js"
+  },
+  "keywords": [
+    "second-hand",
+    "marketplace",
+    "dublin",
+    "demo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "express": "^4.19.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "nodemon": "^3.0.2"
+  }
+}
+
