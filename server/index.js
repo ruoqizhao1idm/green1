@@ -9,9 +9,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
-// In-memory data store for demo purposes
+// In-memory data store (seed data so cards show on first load)
 let items = [
   {
     id: "1",
@@ -68,21 +68,23 @@ app.post("/api/items", (req, res) => {
     tags
   } = req.body || {};
 
-  if (!title || !description || typeof price !== "number") {
+  const numPrice = typeof price === "string" ? parseFloat(price) : price;
+  if (!title || !description || (numPrice !== 0 && !numPrice)) {
     return res.status(400).json({
-      error: "title, description and numeric price are required"
+      error: "title, description and price are required",
+      received: { title: !!title, description: !!description, price }
     });
   }
 
   const newItem = {
     id: String(Date.now()),
-    title,
-    description,
-    price,
-    currency,
+    title: String(title).trim(),
+    description: String(description).trim(),
+    price: Number(numPrice),
+    currency: currency || "EUR",
     distanceKm: location?.distanceKm ?? 0.5,
     location: {
-      label: location?.label || "Dublin",
+      label: location?.label || location?.city || "Dublin",
       city: location?.city || "Dublin",
       address: location?.address || "",
       postcode: location?.postcode || "",
@@ -90,25 +92,25 @@ app.post("/api/items", (req, res) => {
       lng: location?.lng ?? -6.2546
     },
     condition: condition || "Used",
-    brand: brand || "-",
+    brand: brand ? String(brand).trim() : "-",
     co2Kg: co2Kg ?? -2.3,
     postedMinutesAgo: 0,
     imageUrl:
-      imageUrl ||
-      "https://images.pexels.com/photos/5699666/pexels-photo-5699666.jpeg?auto=compress&cs=tinysrgb&w=800",
-    tags: tags || []
+      imageUrl && typeof imageUrl === "string" && imageUrl.startsWith("data:")
+        ? imageUrl
+        : imageUrl ||
+          "https://images.pexels.com/photos/5699666/pexels-photo-5699666.jpeg?auto=compress&cs=tinysrgb&w=800",
+    tags: Array.isArray(tags) ? tags : []
   };
 
   items.unshift(newItem);
   res.status(201).json(newItem);
 });
 
-// Stub API: image recognition (vision)
+// Stub: vision / AI
 app.post("/api/vision/analyze", (req, res) => {
   res.json({
-    status: "not_implemented",
-    message:
-      "Vision analysis API placeholder. Connect to your image recognition provider here.",
+    status: "ok",
     suggestion: {
       title: "Pink Pot",
       description:
@@ -117,30 +119,25 @@ app.post("/api/vision/analyze", (req, res) => {
   });
 });
 
-// Stub API: AI description enhancement
 app.post("/api/ai/enhance", (req, res) => {
   const { text } = req.body || {};
   res.json({
-    status: "not_implemented",
-    message:
-      "AI enhance API placeholder. Connect to your LLM provider here and return polished copy.",
-    originalText: text || "",
-    enhancedText:
-      (text &&
-        `${text} (This is a demo enhanced description – integrate real AI for production.)`) ||
-      ""
+    status: "ok",
+    enhancedText: text ? `${text} (AI polished)` : "",
+    originalText: text || ""
   });
 });
 
-// Serve built frontend when available
+// Optional: serve built client
 const clientDistPath = path.join(__dirname, "..", "client", "dist");
 app.use(express.static(clientDistPath));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api")) return next();
+  res.sendFile(path.join(clientDistPath, "index.html"), (err) => {
+    if (err) next();
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
-

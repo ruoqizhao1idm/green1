@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useApp } from "../state/AppContext.jsx";
 
 const IRISH_CITIES = [
   "Dublin",
@@ -21,6 +22,7 @@ const CONDITIONS = ["New", "Like new", "Used", "Well loved"];
 
 export default function PostPage() {
   const navigate = useNavigate();
+  const { setItems } = useApp();
   const [imagePreview, setImagePreview] = useState(null);
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
@@ -114,10 +116,12 @@ export default function PostPage() {
           "https://images.pexels.com/photos/5699666/pexels-photo-5699666.jpeg?auto=compress&cs=tinysrgb&w=800"
       });
 
+      setItems((prev) => [res.data, ...(prev || [])]);
       navigate(`/items/${res.data.id}`);
     } catch (err) {
       console.error("Create item failed", err);
-      alert("Failed to submit. Please try again.");
+      const msg = err.response?.data?.error || err.message || "Failed to submit. Please try again.";
+      alert(msg);
     }
   };
 

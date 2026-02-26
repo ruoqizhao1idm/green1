@@ -8,17 +8,61 @@ import FavoritesPage from "./pages/FavoritesPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 
 function TopNav() {
-  return (
-    <header className="top-nav">
-      <div className="top-nav-left">
-        <div>
-          <div className="app-title">Sustainable Swaps</div>
-          <div className="app-title-sub">in Dublin</div>
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHome = location.pathname === "/";
+
+  const goHome = () => navigate("/");
+
+  if (isHome) {
+    return (
+      <header className="top-nav">
+        <div className="top-nav-left">
+          <div>
+            <div className="app-title">Sustainable Swaps</div>
+            <div className="app-title-sub">in Dublin</div>
+          </div>
         </div>
-      </div>
-      <div className="top-nav-icon">
-        <span className="logo-mark">♻</span>
-      </div>
+        <div className="top-nav-icon">
+          <div className="app-logo-wrap">
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="app-logo"
+              onError={(e) => {
+                e.target.style.display = "none";
+                const wrap = e.target.closest(".app-logo-wrap");
+                const ph = wrap?.querySelector(".app-logo-placeholder");
+                if (ph) ph.style.display = "inline-flex";
+              }}
+            />
+            <span className="app-logo-placeholder" style={{ display: "none" }}>
+              ♻
+            </span>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  const titles = {
+    "/post": "Plant Jasmeen",
+    "/map": "Map",
+    "/favorites": "Favorites",
+    "/cart": "My Cart"
+  };
+  const pathKey = location.pathname.startsWith("/items/")
+    ? null
+    : Object.keys(titles).find((k) => location.pathname === k);
+  const pageTitle = pathKey ? titles[pathKey] : "Detail";
+
+  return (
+    <header className="page-header">
+      <button type="button" className="back-btn" onClick={goHome} aria-label="Back to home">
+        ←
+      </button>
+      <h1 className="page-header-title">{pageTitle}</h1>
+      <div style={{ width: 36 }} />
     </header>
   );
 }
@@ -37,13 +81,15 @@ function BottomNav() {
           "bottom-nav-btn" + (isRoute("/map") ? " bottom-nav-btn--active" : "")
         }
         onClick={() => navigate("/map")}
+        aria-label="Map"
       >
-        <span className="bottom-nav-icon">⚓</span>
+        <span className="bottom-nav-icon">📍</span>
       </button>
       <button
         type="button"
         className="bottom-nav-plus"
         onClick={() => navigate("/post")}
+        aria-label="Post"
       >
         +
       </button>
@@ -56,6 +102,7 @@ function BottomNav() {
             : "")
         }
         onClick={() => navigate("/favorites")}
+        aria-label="Favorites"
       >
         <span className="bottom-nav-icon">★</span>
       </button>
@@ -83,4 +130,3 @@ export default function App() {
     </div>
   );
 }
-

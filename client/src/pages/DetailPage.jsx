@@ -68,20 +68,13 @@ export default function DetailPage() {
           <div className="detail-header">
             <button
               type="button"
-              className="ghost-pill"
-              onClick={() => navigate(-1)}
-            >
-              ← Back
-            </button>
-            <button
-              type="button"
               className="fav-circle"
               onClick={() => toggleFavorite(item.id)}
               aria-label={isFav ? "Unfavorite" : "Favorite"}
             >
               {isFav ? "★" : "☆"}
             </button>
-          </div>
+            </div>
 
           <h1 className="detail-title">{item.title}</h1>
           <div className="detail-price-row">
